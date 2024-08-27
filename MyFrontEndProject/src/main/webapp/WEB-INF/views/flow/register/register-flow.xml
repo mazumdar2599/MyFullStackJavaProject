@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/webflow
+                          http://www.springframework.org/schema/webflow/spring-webflow.xsd">
+
+
+	<var name="billing" class="com.app.MyBackEndProject.Modal.Address" />
+	<var name="user" class="com.app.MyBackEndProject.Modal.User" />
+
+	<on-start>
+		<evaluate expression="registerHandler.init()"
+			result="flowScope.registerModel"></evaluate>
+	</on-start>
+
+	<!-- Start State -->
+	<view-state id="personal" model="user"
+		view="flow/register/register-personal">
+		<transition on="billing" to="validate"></transition>
+		<on-exit>
+			<evaluate
+				expression="registerHandler.addUser(flowScope.registerModel , user)"></evaluate>
+		</on-exit>
+
+	</view-state>
+
+	<view-state id="billing" model="billing"
+		view="flow/register/register-address">
+
+		<transition on="confirm" to="confirm"></transition>
+		<on-exit>
+			<evaluate
+				expression="registerHandler.addBilling(flowScope.registerModel , billing)"></evaluate>
+		</on-exit>
+	</view-state>
+
+	<view-state id="confirm" model="flowScope.registerModel"
+		view="flow/register/register-confirm">
+		<transition on="personal" to="personal"></transition>
+		<transition on="billing" to="billing"></transition>
+		<transition on="confirm" to="submit"></transition>
+	</view-state>
+	
+	<action-state id="submit">
+		<evaluate
+				expression="registerHandler.saveAll(flowScope.registerModel)"></evaluate>
+				<transition on="success" to="success" />
+	</action-state>
+	
+	<action-state id="validate">
+	<evaluate
+				expression="registerHandler.validate(user,messageContext)"></evaluate>
+				<transition on="error" to="personal" />
+				<transition on="billing" to="billing" />
+	</action-state>
+
+	<end-state id="success" view="flow/register/register-success"></end-state>
+
+</flow>

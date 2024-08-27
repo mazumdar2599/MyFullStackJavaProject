@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow xmlns="http://www.springframework.org/schema/webflow"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/webflow
+                          http://www.springframework.org/schema/webflow/spring-webflow.xsd">
+	<var name="shipping" class="com.app.MyBackEndProject.Modal.Address" />
+	<on-start>
+		<evaluate expression="checkoutHandler.init(currentUser.name)"
+			result="flowScope.checkoutModel" />
+	</on-start>
+
+
+	<view-state id="address"
+		view="flow/cart/checkout/checkout-address" model="shipping">
+		<on-entry>
+			<evaluate
+				expression="checkoutHandler.getShippingAddresses(flowScope.checkoutModel)"
+				result="viewScope.addresses" />
+		</on-entry>
+
+		<transition on="saveAddress" to="saveAddress"
+			validate="true" />
+
+		<transition on="addressSelection" to="saveAddressSelection"
+			validate="false" />
+
+	</view-state>
+
+	<action-state id="saveAddress">
+		<evaluate
+			expression="checkoutHandler.saveAddress(flowScope.checkoutModel, shipping)" />
+		<transition on="success" to="payment" />
+	</action-state>
+
+
+	<action-state id="saveAddressSelection">
+		<evaluate
+			expression="checkoutHandler.saveAddressSelection(flowScope.checkoutModel, requestParameters.shippingId)" />
+		<transition on="success" to="payment" />
+	</action-state>
+
+	<view-state id="payment"
+		view="flow/cart/checkout/checkout-payment">
+		<transition on="pay" to="save" />
+
+	</view-state>
+
+	<action-state id="save">
+		<evaluate
+			expression="checkoutHandler.saveOrder(flowScope.checkoutModel)" />
+		<transition on="success" to="success" />
+	</action-state>
+
+	<view-state id="success"
+		view="flow/cart/checkout/checkout-success">
+
+		<on-entry>
+			<evaluate
+				expression="checkoutHandler.getOrderDetails(flowScope.checkoutModel)"
+				result="viewScope.orderDetails" />
+		</on-entry>
+	</view-state>
+
+</flow>
